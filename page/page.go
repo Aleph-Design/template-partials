@@ -150,7 +150,7 @@ func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
 
 // LoadLayoutsAndPartials accepts a slice of strings which should consist of the types of files
 // that are either layouts or partials for templates. For example, if a layout file is named
-// `base.layout.gohtml` and a partial is named `footer.partial.gohtml`, then we would pass
+// `base.layout.tmpl` and a partial is named `footer.partial.tmpl`, then we would pass
 //
 //	[]string{".layout", ".partial"}
 //
@@ -170,7 +170,7 @@ func (ren *Render) LoadLayoutsAndPartials(fileTypes []string) error {
 }
 
 func addTemplate(path, fileType string) ([]string, error) {
-	files, err := find(path, ".gohtml")
+	files, err := find(path, ".tmpl")
 	if err != nil {
 		return nil, err
 	}

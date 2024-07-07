@@ -35,7 +35,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]any)
 		data["payload"] = "This is MY passed data."
-		err := render.Show(w, "home.page.gohtml", &Data{Data: data})
+		err := render.Show(w, "home.page.tmpl", &Data{Data: data})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			log.Println(err)
@@ -46,7 +46,7 @@ func main() {
 	http.HandleFunc("/string", func(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]any)
 		data["payload"] = "This is passed data."
-		out, err := render.String("home.page.gohtml", &Data{Data: data})
+		out, err := render.String("home.page.tmpl", &Data{Data: data})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			log.Println(err)
