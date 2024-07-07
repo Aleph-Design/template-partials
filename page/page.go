@@ -40,7 +40,7 @@ func New() *Render {
 
 // Show generates an HTML page from template file(s).
 // @ t:
-// -	template name: "home.page.tmpl"
+// -	template name: "home.page.tmpl", "about.page.tmpl", etc
 // @ td:
 // -	template data: 
 //			data := make(map[string]any)
@@ -52,8 +52,7 @@ func (ren *Render) Show(w http.ResponseWriter, t string, td any) error {
 		log.Println("error building", err)
 		return err
 	}
-
-	// Execute the template.
+	// Execute template.
 	if err := tmpl.ExecuteTemplate(w, t, td); err != nil {
 		log.Println("error executing", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -70,13 +69,11 @@ func (ren *Render) String(t string, td any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	// Execute the template, storing the result in a bytes.Buffer variable.
 	var tpl bytes.Buffer
 	if err := tmpl.Execute(&tpl, td); err != nil {
 		return "", err
 	}
-
 	// Return a string from the bytes.Buffer.
 	result := tpl.String()
 	return result, nil
@@ -84,16 +81,16 @@ func (ren *Render) String(t string, td any) (string, error) {
 
 // GetTemplate attempts to get a template from cache -
 //	builds it if it does not find it - and returns it.
-func (ren *Render) GetTemplate(t string) (*template.Template, error) {
-	// Call buildTemplate to get the template, either from the cache or by building it
-	// from disk.
-	tmpl, err := ren.buildTemplate(t)
-	if err != nil {
-		return nil, err
-	}
-
-	return tmpl, nil
-}
+//  FUNCTION NOT USED
+// func (ren *Render) GetTemplate(t string) (*template.Template, error) {
+// 	// Call buildTemplate to get the template, either from the cache or by building it
+// 	// from disk.
+// 	tmpl, err := ren.buildTemplate(t)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return tmpl, nil
+// }
 
 // buildTemplate a utility function that creates a template, 
 //	either from cache, or from disk. 
@@ -111,7 +108,7 @@ func (ren *Render) buildTemplate(t string) (*template.Template, error) {
 	if ren.UseCache {
 		if templateFromMap, ok := ren.TemplateMap[t]; ok {
 			if ren.Debug {
-				log.Println("Reading template", t, "from cache")
+				log.Println("114 - page-Reading template", t, "from cache")
 			}
 			tmpl = templateFromMap
 		}
@@ -192,6 +189,15 @@ func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
 
 	return tmpl, nil
 }
+
+/*
+It a bit strange that when requesting home or about
+both templates are read from cache:
+2024/07/07 17:59:11 Reading template about.page.tmpl from cache
+2024/07/07 17:59:11 Reading template home.page.tmpl from cache
+2024/07/07 17:59:40 Reading template about.page.tmpl from cache
+2024/07/07 17:59:40 Reading template home.page.tmpl from cache
+*/
 
 // LoadLayoutsAndPartials accepts a slice of strings which should consist of the types of files
 // that are either layouts or partials for templates.
