@@ -44,6 +44,17 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/about", func(w http.ResponseWriter, r *http.Request) {
+		data := make(map[string]any)
+		data["payload"] = "This is MY passed data for about page."
+		err := render.Show(w, "about.page.tmpl", &Data{Data: data})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Println(err)
+			return
+		}
+	})
+
 	http.HandleFunc("/string", func(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]any)
 		data["payload"] = "This is passed data."

@@ -136,6 +136,11 @@ func (ren *Render) buildTemplate(t string) (*template.Template, error) {
 // @ return:
 // -	an actually executable template set
 func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
+	fmt.Println("139 - page-buildTemplateFromDisk.t: ", t)
+	// 139 - page-buildTemplateFromDisk.t:  home.page.tmpl
+	// 't' becomes the name of the (future) template set.
+	// the key in map[string]*.template.Template
+
 	// templateSlice will hold all templates (names / file names) necessary to 
 	// build a finished template set.
 	var templateSlice []string
@@ -159,9 +164,27 @@ func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
 	// Note that this(?) is ignored in development, but does not hurt anything.
 	// Well, I trust it's not ignored. Otherwise there would be no template set
 	// in the map.
+	// So here is the template set 'tmpl' added: map["home.page.tmpl"] = tmpl
 	mapLock.Lock()
 	ren.TemplateMap[t] = tmpl
 	mapLock.Unlock()
+
+	// show the contents of map["home.page.tmpl"]
+	tpl := ren.TemplateMap["about.page.tmpl"]
+	fmt.Println("174 - page-tpl.DefinedTemplates(): ", tpl.DefinedTemplates())
+	// 139 - page-buildTemplateFromDisk.t:  home.page.tmpl
+	// 174 - page-tpl.DefinedTemplates():  ; 
+	//		defined templates are: "css", "title", "css.partial.tmpl", "footer.partial.tmpl", 
+	//													 "home.page.tmpl", "content", "footer", "base", 
+	//													 "base.layout.tmpl", "title.partial.tmpl"
+	// So, all this is available when we ender "home.page.tmpl" and call map["home.page.tmpl"]
+	//
+	// 139 - page-buildTemplateFromDisk.t:  about.page.tmpl
+	// 174 - page-tpl.DefinedTemplates():  ; 
+	//		defined templates are: "content", "base", "title.partial.tmpl", "about.page.tmpl", 
+	//													 "css", "title", "footer", "base.layout.tmpl", 
+	//													 "css.partial.tmpl", "footer.partial.tmpl"
+	// So, all this is available when we render "about.page.tmpl" and call map["about.page.tmpl"]
 
 	if ren.Debug {
 		log.Println("Reading template", t, "from disk")
