@@ -167,7 +167,7 @@ func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
 	mapLock.Unlock()
 
 	// show the contents of map["home.page.tmpl"]
-	tpl := ren.TemplateMap["about.page.tmpl"]
+	tpl := ren.TemplateMap["home.page.tmpl"]
 	fmt.Println("174 - page-tpl.DefinedTemplates(): ", tpl.DefinedTemplates())
 	// 139 - page-buildTemplateFromDisk.t:  home.page.tmpl
 	// 174 - page-tpl.DefinedTemplates():  ; 
