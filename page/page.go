@@ -2,6 +2,7 @@ package page
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
@@ -14,10 +15,11 @@ import (
 
 var mapLock sync.Mutex
 
-// Render is the main type for this package. Create a variable of this type
-// and specify its fields, and you have access to the Show and String functions.
+// Render is the main type for this package. 
+// Create a variable of this type and specify its fields, then you have 
+// access to Show and String functions.
 type Render struct {
-	TemplateDir string                        // The path to templates.
+	TemplateDir string                        // Path to templates.
 	Functions   template.FuncMap              // A map of functions we want to pass to our templates.
 	UseCache    bool                          // If true, use the template cache, stored in TemplateMap.
 	TemplateMap map[string]*template.Template // Our template cache.
@@ -36,7 +38,13 @@ func New() *Render {
 	}
 }
 
-// Show generates a page of html from our template file(s).
+// Show generates an HTML page from template file(s).
+// @ t:
+// -	template name: "home.page.tmpl"
+// @ td:
+// -	template data: 
+//			data := make(map[string]any)
+//			data["payload"] = "This is MY passed data."
 func (ren *Render) Show(w http.ResponseWriter, t string, td any) error {
 	// Call buildTemplate to get the template, either from the cache or by building it from disk.
 	tmpl, err := ren.buildTemplate(t)
@@ -74,7 +82,8 @@ func (ren *Render) String(t string, td any) (string, error) {
 	return result, nil
 }
 
-// GetTemplate attempts to get a template from the cache, builds it if it does not find it, and returns it.
+// GetTemplate attempts to get a template from cache -
+//	builds it if it does not find it - and returns it.
 func (ren *Render) GetTemplate(t string) (*template.Template, error) {
 	// Call buildTemplate to get the template, either from the cache or by building it
 	// from disk.
@@ -86,10 +95,15 @@ func (ren *Render) GetTemplate(t string) (*template.Template, error) {
 	return tmpl, nil
 }
 
-// buildTemplate is a utility function that creates a template, either from the cache, or from
-// disk. The template is ready to accept functions & data, and then get rendered.
+// buildTemplate a utility function that creates a template, 
+//	either from cache, or from disk. 
+//	The template is ready to accept functions & data, and then get rendered.
+// @ t:
+// -	template name: "home.page.tmpl"
+// @ return:
+// -	an actually executable template set
 func (ren *Render) buildTemplate(t string) (*template.Template, error) {
-	// tmpl is the variable that will hold our template.
+	// tmpl is the variable that will hold our template set
 	var tmpl *template.Template
 
 	// If we are using the cache, get try to get the pre-compiled template from our
@@ -118,25 +132,33 @@ func (ren *Render) buildTemplate(t string) (*template.Template, error) {
 	return tmpl, nil
 }
 
-// buildTemplateFromDisk builds a template from disk.
+// buildTemplateFromDisk builds a new template set from disk.
+// @ return:
+// -	an actually executable template set
 func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
-	// templateSlice will hold all the templates necessary to build our finished template.
+	// templateSlice will hold all templates (names / file names) necessary to 
+	// build a finished template set.
 	var templateSlice []string
 
 	// Read in the partials, if any.
+	// Read any partial associated with this (future) template set.
+	// 'Future' because this is still a bunch of text.
 	templateSlice = append(templateSlice, ren.Partials...)
 
-	// Append the template we want to render to the slice. Use path.Join to make it os agnostic.
+	// Append the template name we want to render to the slice. 
+	// Use path.Join to make it os agnostic.
 	templateSlice = append(templateSlice, path.Join(ren.TemplateDir, t))
 
-	// Create a new template by parsing all the files in the slice.
+	// Create a new template set by parsing all files in the slice.
 	tmpl, err := template.New(t).Funcs(ren.Functions).ParseFiles(templateSlice...)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add the template to the template map stored in our receiver.
-	// Note that this is ignored in development, but does not hurt anything.
+	// Add the template set to the template map stored in our receiver.
+	// Note that this(?) is ignored in development, but does not hurt anything.
+	// Well, I trust it's not ignored. Otherwise there would be no template set
+	// in the map.
 	mapLock.Lock()
 	ren.TemplateMap[t] = tmpl
 	mapLock.Unlock()
@@ -149,13 +171,19 @@ func (ren *Render) buildTemplateFromDisk(t string) (*template.Template, error) {
 }
 
 // LoadLayoutsAndPartials accepts a slice of strings which should consist of the types of files
-// that are either layouts or partials for templates. For example, if a layout file is named
-// `base.layout.tmpl` and a partial is named `footer.partial.tmpl`, then we would pass
+// that are either layouts or partials for templates.
+// For example, if a layout file is named`base.layout.tmpl` and a partial is named `footer.partial.tmpl`,
+// then we would pass:
 //
 //	[]string{".layout", ".partial"}
 //
 // Files anywhere in TemplateDir will be added the the Partials field of the Render type.
+//
+// Function returns:
+//  [templates/base.layout.tmpl templates/css.partial.tmpl templates/footer.partial.tmpl]
 func (ren *Render) LoadLayoutsAndPartials(fileTypes []string) error {
+	fmt.Println("159 - page-LoadLayoutsAndPartials: ", fileTypes)
+	// 159 - page-LoadLayoutsAndPartials:  [.layout .partial]
 	var templates []string
 	for _, t := range fileTypes {
 		files, err := addTemplate(ren.TemplateDir, t)
@@ -164,8 +192,9 @@ func (ren *Render) LoadLayoutsAndPartials(fileTypes []string) error {
 		}
 		templates = append(templates, files...)
 	}
-
 	ren.Partials = templates
+	fmt.Println("171 - page-LoadLayoutsAndPartials: ", ren.Partials)
+	// 171 - page-LoadLayoutsAndPartials:  [templates/base.layout.tmpl templates/css.partial.tmpl templates/footer.partial.tmpl]
 	return nil
 }
 

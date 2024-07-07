@@ -27,10 +27,11 @@ func main() {
 	}
 
 	// Call LoadLayoutsAndPartials to automatically load all such files found in TemplateDir.
-	err := render.LoadLayoutsAndPartials([]string{".layout"})
+	err := render.LoadLayoutsAndPartials([]string{".layout", ".partial"})
 	if err != nil {
 		log.Fatal(err)
 	}
+	// 159 - page-LoadLayoutsAndPartials:  [.layout .partial]
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		data := make(map[string]any)
